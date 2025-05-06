@@ -5,6 +5,11 @@ pipeline {
         stage('Get Code') {
             agent { label 'agente-1' }
             steps {
+                bat '''
+                    whoami
+                    hostname
+                    echo ${WORKSPACE}
+                '''
                 echo 'Clonando repositorio dentro de agente-1'
                 git 'https://github.com/PavonMarquez/cp1-helloworld.git'
 
@@ -13,12 +18,19 @@ pipeline {
 
                 echo 'Guardando en stash para otros agentes'
                 stash includes: '**', name: 'codigo-fuente'
+
             }
         }
 
         stage('Build') {
             agent { label 'agente-1' }
             steps {
+
+                bat '''
+                    whoami
+                    hostname
+                    echo ${WORKSPACE}
+                '''
                 echo 'Preparando entorno de Build en agente-1'
                 unstash 'codigo-fuente'
                 echo 'Build completado (no se compila por ser Python)'
@@ -35,6 +47,11 @@ pipeline {
                 stage('Unit') {
                     agent { label 'agente-2' }
                     steps {
+                        sh '''
+                            whoami
+                            hostname
+                            echo ${WORKSPACE}
+                        '''
                         echo '### Ejecutando Unit en agente-2 ###'
                         unstash 'codigo-fuente'
 
@@ -65,6 +82,11 @@ pipeline {
                 stage('Rest') {
                     agent { label 'agente-3' }
                     steps {
+                        sh '''
+                            whoami
+                            hostname
+                            echo ${WORKSPACE}
+                        '''
                         echo '### Ejecutando Rest en agente-3 ###'
                         unstash 'codigo-fuente'
 
@@ -114,6 +136,11 @@ pipeline {
         stage('Results') {
             agent { label 'agente-1' } 
             steps {
+                bat '''
+                    whoami
+                    hostname
+                    echo ${WORKSPACE}
+                '''
                 echo 'Resultados'
                 
                 unstash 'unit-results'
