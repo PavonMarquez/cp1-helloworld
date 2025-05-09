@@ -35,7 +35,7 @@ class TestApi(unittest.TestCase):
             response.read().decode(), "8", "ERROR SQRT"
         )
 
-        def test_api_multiply(self):
+    def test_api_multiply(self):
         url = f"{BASE_URL}/calc/multiply/3/4"
         response = urlopen(url, timeout=DEFAULT_TIMEOUT)
         self.assertEqual(
@@ -56,8 +56,7 @@ class TestApi(unittest.TestCase):
         )
 
     def test_api_divide_by_zero(self):
-    url = f"{BASE_URL}/calc/divide/10/0"
-    try:
+        url = f"{BASE_URL}/calc/divide/10/0"
         response = urlopen(url, timeout=DEFAULT_TIMEOUT)
         self.assertEqual(
             response.status, http.client.NOT_ACCEPTABLE, f"Error en la petición API a {url}"
@@ -65,8 +64,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(
             response.read().decode(), "El divisor no puede ser 0", "ERROR DIVIDE BY ZERO"
         )
-    except Exception as e:
-        self.fail(f"Error inesperado al hacer la petición a {url}: {e}")
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
