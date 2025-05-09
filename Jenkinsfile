@@ -2,43 +2,49 @@ pipeline {
     agent any
     
     stages {
-        stage('Get Code') {
+        stage('Get code') {
             steps {
                 echo 'Traer el codigo'
                 git 'https://github.com/PavonMarquez/cp1-helloworld.git'
                 echo 'Archivos descargados'
-                bat 'dir'
-                echo WORKSPACE
+                sh '''
+                    ls -la
+                    echo $WORKSPACE
+                '''
             }
         }
         
         stage('Build') {
             steps {
-                echo 'NO SE COMPILA POR SER LENGUAJE PYTJON'
+                echo 'No se compila por ser lenguaje Python'
             }
         }
         
-        stage('Test') {
+        stage('Tests') {
             parallel {
                 stage('Unit') {
-                    steps {
-                        bat '''
-                            set PYTHONPATH=%WORKSPACE%
-                            pytest --junitxml=result-unit.xml test\\unit
-                        '''
-                    }
-                }
-                
+            steps {
+                sh '''
+                    export PYTHONPATH=$WORKSPACE
+                    pytest --junitxml=result-unit.xml test/unit
+                '''
+            }
+        }
+        
                 stage('Rest') {
                     steps {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                            bat '''
-                                set FLASK_APP=app\\api.py
-                                set FLASK_ENV=development
-                                start flask run
-                                start java -jar C:\\Mac\\Home\\Desktop\\Unir\\ejercicios\\wiremock\\wiremock-jre8-standalone-2.28.0.jar --port 9090 --root-dir C:\\Mac\\Home\\Desktop\\Unir\\ejercicios\\wiremock
-                                set PYTHONPATH=%WORKSPACE%
-                                pytest --junitxml=result-rest.xml test\\rest
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
+                            sh '''
+                                export FLASK_APP=app/api.py
+                                export FLASK_ENV=development
+                                flask run &
+                    
+                                java -jar /home/jenkins/wiremock/wiremock-jre8-standalone-2.33.2.jar --port 9090 --root-dir /home/jenkins/wiremock &
+                                export PYTHONPATH=$WORKSPACE
+                    
+                                sleep 5
+                    
+                                pytest --junitxml=result-rest.xml test/rest
                             '''
                         }
                     }
