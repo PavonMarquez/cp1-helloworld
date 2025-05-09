@@ -1,35 +1,36 @@
 pipeline {
-    agent none
-
+    agent none 
+    
     stages {
-        stage('Get Code') {
-            agent { label 'agente-1' }
+        stage('Get code') {
+            agent { label 'agente-1 (server)' }
+            
             steps {
-                bat '''
+                sh '''
                     whoami
                     hostname
-                    echo ${WORKSPACE}
+                    echo $WORKSPACE
                 '''
                 echo 'Clonando repositorio dentro de agente-1'
                 git 'https://github.com/PavonMarquez/cp1-helloworld.git'
-
-                echo 'Mostrando archivos clonados'
-                bat 'dir'
-
+                
+                echo 'Mostrandooslos archivos clonados'
+                sh 'ls -la'
+                
                 echo 'Guardando en stash para otros agentes'
-                stash includes: '**', name: 'codigo-fuente'
-
+                stash includes: '**', name: 'codigo-fuente'   
             }
         }
-
+        
         stage('Build') {
-            agent { label 'agente-1' }
+            agent { label 'agente-1 (server)' }
+            
             steps {
 
-                bat '''
+                sh '''
                     whoami
                     hostname
-                    echo ${WORKSPACE}
+                    echo $WORKSPACE
                 '''
                 echo 'Preparando entorno de Build en agente-1'
                 unstash 'codigo-fuente'
@@ -41,11 +42,11 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Test') {
             parallel {
                 stage('Unit') {
-                    agent { label 'agente-2' }
+                    agent { label 'agente-2 (server)' }
                     steps {
                         sh '''
                             whoami
@@ -80,7 +81,7 @@ pipeline {
                 }
 
                 stage('Rest') {
-                    agent { label 'agente-3' }
+                    agent { label 'agente-3 (server)' }
                     steps {
                         sh '''
                             whoami
@@ -130,13 +131,13 @@ pipeline {
                         }
                     }
                 }
-            } // <-- Cierra parallel
-        } // <-- Cierra stage('Test')
-
+            }
+        } 
+        
         stage('Results') {
-            agent { label 'agente-1' } 
+            agent { label 'agente-1 (server)' } 
             steps {
-                bat '''
+                sh '''
                     whoami
                     hostname
                     echo ${WORKSPACE}
@@ -148,7 +149,6 @@ pipeline {
                 
                 junit 'result*.xml'
             }
-        } // <-- Cierra stage('Results') 
-
-    } // <-- Cierra stages
-} // <-- Cierra pipeline
+        } 
+    }
+}
